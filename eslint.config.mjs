@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // 第三方 skills 自带脚本，不参与项目 lint
+    ".opencode/**",
   ]),
 ]);
 
