@@ -1,6 +1,8 @@
 import { Prisma } from "@prisma/client";
 
+import { ORDERS_PAGE_SIZE } from "@/lib/constants";
 import { prisma } from "@/lib/db";
+import { parsePage } from "@/lib/utils";
 
 export const orderListSelect = {
   id: true,
@@ -8,8 +10,8 @@ export const orderListSelect = {
   status: true,
   totalCents: true,
   createdAt: true,
-  _count: {
-    select: { items: true },
+  items: {
+    select: { quantity: true },
   },
 } satisfies Prisma.OrderSelect;
 
@@ -40,18 +42,33 @@ export const orderDetailSelect = {
   },
 } satisfies Prisma.OrderSelect;
 
-export async function getOrders(userId: string) {
-  const orders = await prisma.order.findMany({
-    where: { userId },
+export async function getOrders(userId: string, page = 1) {
+  const safePage = parsePage(page);
+  const where = { userId };
+  const total = await prisma.order.count({ where });
+  const totalPages = Math.max(1, Math.ceil(total / ORDERS_PAGE_SIZE));
+  const currentPage = Math.min(safePage, totalPages);
+
+  const rows = await prisma.order.findMany({
+    where,
     orderBy: { createdAt: "desc" },
-    take: 50,
+    skip: (currentPage - 1) * ORDERS_PAGE_SIZE,
+    take: ORDERS_PAGE_SIZE,
     select: orderListSelect,
   });
 
-  return orders.map(({ _count, ...order }) => ({
+  const items = rows.map(({ items: orderItems, ...order }) => ({
     ...order,
-    itemCount: _count.items,
+    itemCount: orderItems.reduce((sum, item) => sum + item.quantity, 0),
   }));
+
+  return {
+    items,
+    total,
+    page: currentPage,
+    pageSize: ORDERS_PAGE_SIZE,
+    totalPages,
+  };
 }
 
 export async function getOrderById(userId: string, orderId: string) {
@@ -61,7 +78,8 @@ export async function getOrderById(userId: string, orderId: string) {
   });
 }
 
-export type OrderListItem = Awaited<ReturnType<typeof getOrders>>[number];
+export type OrderListResult = Awaited<ReturnType<typeof getOrders>>;
+export type OrderListItem = OrderListResult["items"][number];
 export type OrderDetail = NonNullable<
   Awaited<ReturnType<typeof getOrderById>>
 >;

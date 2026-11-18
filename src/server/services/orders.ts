@@ -32,7 +32,9 @@ function generateOrderNo(): string {
 function isRetryableWriteError(error: unknown): boolean {
   return (
     error instanceof Prisma.PrismaClientKnownRequestError &&
-    (error.code === "P2002" || error.code === "P2034")
+    (error.code === "P2002" ||
+      error.code === "P2034" ||
+      error.code === "P2028")
   );
 }
 
@@ -144,7 +146,7 @@ export async function createOrder(userId: string) {
       }
 
       return order;
-    }),
+    }, { timeout: 10_000, maxWait: 5_000 }),
   );
 }
 
@@ -190,7 +192,7 @@ export async function payOrder(userId: string, orderId: string) {
       }
 
       return result;
-    }),
+    }, { timeout: 10_000, maxWait: 5_000 }),
   );
 }
 
@@ -232,11 +234,21 @@ export async function cancelOrder(userId: string, orderId: string) {
         throw new OrderError("订单状态已变化，请刷新后重试", 409);
       }
 
-      for (const item of order.items) {
-        await tx.product.updateMany({
-          where: { id: item.productId },
-          data: { stock: { increment: item.quantity } },
-        });
+      const shouldRestock =
+        order.status === ORDER_STATUS.PENDING ||
+        order.status === ORDER_STATUS.PAID;
+
+      if (shouldRestock) {
+        for (const item of order.items) {
+          const restored = await tx.product.updateMany({
+            where: { id: item.productId },
+            data: { stock: { increment: item.quantity } },
+          });
+
+          if (restored.count === 0) {
+            throw new OrderError("商品已不存在，无法恢复库存", 409);
+          }
+        }
       }
 
       const result = await tx.order.findUnique({
@@ -249,6 +261,6 @@ export async function cancelOrder(userId: string, orderId: string) {
       }
 
       return result;
-    }),
+    }, { timeout: 10_000, maxWait: 5_000 }),
   );
 }

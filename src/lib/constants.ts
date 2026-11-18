@@ -4,6 +4,8 @@ export const PRODUCTS_PAGE_SIZE = 9;
 
 export const MAX_CART_QUANTITY = 999;
 
+export const ORDERS_PAGE_SIZE = 10;
+
 export const PRODUCT_STATUS = {
   ACTIVE: "ACTIVE",
   INACTIVE: "INACTIVE",

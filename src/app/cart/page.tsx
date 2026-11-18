@@ -101,7 +101,7 @@ export default async function CartPage() {
               </dl>
               <CheckoutButton disabled={cart.unavailableCount > 0} />
               <p className="mt-3 text-center text-xs text-neutral-400">
-                会员折扣将在下单时计算
+                会员折扣即将上线
               </p>
             </aside>
           </div>

@@ -58,15 +58,14 @@ export function CheckoutButton({ disabled = false }: CheckoutButtonProps) {
       >
         {disabled ? "存在暂不可售商品" : pending ? "提交中…" : "提交订单"}
       </button>
-      {disabled ? (
-        <p className="text-center text-xs text-red-600">
-          请先处理暂不可售商品
-        </p>
-      ) : message ? (
-        <p aria-live="polite" className="text-center text-xs text-neutral-600">
-          {message}
-        </p>
-      ) : null}
+      <p
+        aria-live="polite"
+        className={`min-h-5 text-center text-xs ${
+          disabled ? "text-red-600" : "text-neutral-600"
+        }`}
+      >
+        {disabled ? "请先处理暂不可售商品" : message}
+      </p>
     </div>
   );
 }

@@ -28,9 +28,10 @@ export async function SiteHeader() {
           </Link>
           <Link
             href="/orders"
-            className="hidden text-sm text-neutral-500 transition hover:text-neutral-900 sm:inline"
+            className="text-sm text-neutral-500 transition hover:text-neutral-900"
           >
-            我的订单
+            <span className="sm:hidden">订单</span>
+            <span className="hidden sm:inline">我的订单</span>
           </Link>
           {user ? (
             <>

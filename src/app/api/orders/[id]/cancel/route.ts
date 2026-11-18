@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getCurrentUser } from "@/lib/auth";
+import { rateLimit } from "@/lib/rate-limit";
 import { ensureSameOrigin } from "@/lib/request-security";
 import { cancelOrder, OrderError } from "@/server/services/orders";
 
@@ -22,6 +23,17 @@ export async function POST(request: Request, { params }: RouteContext) {
   }
 
   const { id } = await params;
+  const limit = rateLimit(`order-cancel:${user.id}`, 30, 60 * 1000);
+
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { error: "请求过于频繁，请稍后再试" },
+      {
+        status: 429,
+        headers: { "Retry-After": String(limit.retryAfterSeconds) },
+      },
+    );
+  }
 
   try {
     const order = await cancelOrder(user.id, id);

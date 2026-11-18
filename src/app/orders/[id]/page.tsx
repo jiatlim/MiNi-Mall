@@ -6,6 +6,7 @@ import { OrderActions } from "@/components/order/order-actions";
 import { OrderStatusBadge } from "@/components/order/order-status-badge";
 import { SiteHeader } from "@/components/site-header";
 import { getCurrentUser } from "@/lib/auth";
+import { ORDER_STATUS } from "@/lib/constants";
 import { formatDateTime } from "@/lib/datetime";
 import { formatPrice } from "@/lib/money";
 import { getOrderById } from "@/server/queries/orders";
@@ -100,7 +101,7 @@ export default async function OrderPage({ params }: OrderPageProps) {
                 </div>
               ) : null}
               <div className="flex items-center justify-between border-t border-neutral-100 pt-3">
-                <dt className="text-neutral-500">实付金额</dt>
+                <dt className="text-neutral-500">订单金额</dt>
                 <dd className="text-xl font-semibold text-neutral-900">
                   {formatPrice(order.totalCents)}
                 </dd>
@@ -112,9 +113,24 @@ export default async function OrderPage({ params }: OrderPageProps) {
                 支付时间：{formatDateTime(order.paidAt)}
               </p>
             ) : null}
+            {order.shippedAt ? (
+              <p className="mt-2 text-xs text-neutral-500">
+                发货时间：{formatDateTime(order.shippedAt)}
+              </p>
+            ) : null}
+            {order.completedAt ? (
+              <p className="mt-2 text-xs text-neutral-500">
+                完成时间：{formatDateTime(order.completedAt)}
+              </p>
+            ) : null}
             {order.cancelledAt ? (
               <p className="mt-2 text-xs text-neutral-500">
                 取消时间：{formatDateTime(order.cancelledAt)}
+              </p>
+            ) : null}
+            {order.status === ORDER_STATUS.CANCELLED && order.paidAt ? (
+              <p className="mt-2 text-xs text-neutral-500">
+                该订单为模拟支付，取消不涉及真实退款。
               </p>
             ) : null}
 

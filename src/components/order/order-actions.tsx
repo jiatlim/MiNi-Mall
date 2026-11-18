@@ -16,11 +16,20 @@ export function OrderActions({ orderId, status }: OrderActionsProps) {
   const [message, setMessage] = useState("");
 
   async function run(action: "pay" | "cancel") {
-    if (
-      action === "cancel" &&
-      !window.confirm("确定要取消该订单吗？已扣减的库存会恢复。")
-    ) {
-      return;
+    if (action === "cancel") {
+      const willRestock =
+        status === ORDER_STATUS.PENDING || status === ORDER_STATUS.PAID;
+      const stockNote = willRestock
+        ? "未发货订单会恢复库存。"
+        : "订单已发货或已完成，取消不会恢复库存。";
+
+      if (
+        !window.confirm(
+          `确定要取消该订单吗？${stockNote}模拟支付不涉及真实退款。`,
+        )
+      ) {
+        return;
+      }
     }
 
     setPending(action);
@@ -88,11 +97,12 @@ export function OrderActions({ orderId, status }: OrderActionsProps) {
         </button>
       ) : null}
 
-      {message ? (
-        <p aria-live="polite" className="text-center text-sm text-neutral-600">
-          {message}
-        </p>
-      ) : null}
+      <p
+        aria-live="polite"
+        className="min-h-5 text-center text-sm text-neutral-600"
+      >
+        {message}
+      </p>
     </div>
   );
 }
