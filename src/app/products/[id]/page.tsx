@@ -100,7 +100,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </div>
 
             <div className="mt-8 border-t border-neutral-200 pt-6">
-              <AddToCartButton disabled={product.stock <= 0} />
+              <AddToCartButton
+                productId={product.id}
+                disabled={product.stock <= 0}
+              />
             </div>
           </div>
         </div>

@@ -20,9 +20,15 @@ export async function SiteHeader() {
         </Link>
 
         <div className="flex items-center gap-4">
+          <Link
+            href="/cart"
+            className="text-sm text-neutral-500 transition hover:text-neutral-900"
+          >
+            购物车
+          </Link>
           {user ? (
             <>
-              <span className="max-w-40 truncate text-sm text-neutral-600">
+              <span className="hidden max-w-40 truncate text-sm text-neutral-600 sm:inline">
                 {user.name ?? user.email}
               </span>
               <LogoutButton />

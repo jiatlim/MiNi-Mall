@@ -2,6 +2,8 @@ export const SITE_NAME = "Mini Mall";
 
 export const PRODUCTS_PAGE_SIZE = 9;
 
+export const MAX_CART_QUANTITY = 999;
+
 export const PRODUCT_STATUS = {
   ACTIVE: "ACTIVE",
   INACTIVE: "INACTIVE",
