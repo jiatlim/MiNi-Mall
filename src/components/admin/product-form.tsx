@@ -22,6 +22,7 @@ export type AdminProductFormValue = {
   status: string;
   categoryId: string;
   sortOrder: number;
+  updatedAt: string;
 };
 
 type CategoryOption = {
@@ -72,6 +73,7 @@ export function ProductForm({ categories, product }: ProductFormProps) {
       status: String(formData.get("status") ?? "ACTIVE"),
       categoryId: String(formData.get("categoryId") ?? ""),
       sortOrder: Number.isInteger(sortOrder) ? sortOrder : 0,
+      ...(product ? { version: product.updatedAt } : {}),
     };
 
     try {

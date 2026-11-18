@@ -224,6 +224,13 @@ export async function cancelOrder(userId: string, orderId: string) {
         throw new OrderError("订单已取消", 400);
       }
 
+      if (
+        order.status !== ORDER_STATUS.PENDING &&
+        order.status !== ORDER_STATUS.PAID
+      ) {
+        throw new OrderError("当前订单状态不可取消", 400);
+      }
+
       const updated = await tx.order.updateMany({
         where: {
           id: orderId,

@@ -238,6 +238,8 @@ async function main() {
   const adminPassword = process.env.SEED_ADMIN_PASSWORD;
   const resetAdminPassword =
     process.env.SEED_ADMIN_RESET_PASSWORD === "true";
+  const isDevelopment =
+    !process.env.NODE_ENV || process.env.NODE_ENV === "development";
 
   const existingAdmin = await prisma.user.findUnique({
     where: { email: adminEmail },
@@ -266,6 +268,12 @@ async function main() {
     }
   } else {
     if (!adminPassword) {
+      if (!isDevelopment) {
+        throw new Error(
+          "非开发环境创建管理员必须设置 SEED_ADMIN_PASSWORD",
+        );
+      }
+
       console.warn(
         "未设置 SEED_ADMIN_PASSWORD，使用默认演示密码 Admin123456，请尽快修改。",
       );

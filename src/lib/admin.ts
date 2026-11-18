@@ -2,7 +2,7 @@ import "server-only";
 
 import { redirect } from "next/navigation";
 
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, getCurrentUserForPage } from "@/lib/auth";
 import { USER_ROLES } from "@/lib/constants";
 import { rateLimit, type RateLimitResult } from "@/lib/rate-limit";
 
@@ -27,7 +27,7 @@ export async function requireAdmin(): Promise<AdminCheck> {
 }
 
 export async function requireAdminPage(): Promise<AdminUser> {
-  const user = await getCurrentUser();
+  const user = await getCurrentUserForPage();
 
   if (!user) {
     redirect("/login");

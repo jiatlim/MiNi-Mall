@@ -1,10 +1,12 @@
-import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 
 import { getAdminWriteLimit, requireAdmin } from "@/lib/admin";
-import { prisma } from "@/lib/db";
 import { ensureSameOrigin } from "@/lib/request-security";
+import {
+  AdminCategoryError,
+  deleteAdminCategory,
+} from "@/server/services/admin-categories";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -41,23 +43,18 @@ export async function DELETE(request: Request, { params }: RouteContext) {
   const { id } = await params;
 
   try {
-    await prisma.category.delete({ where: { id } });
+    await deleteAdminCategory(id);
 
     revalidatePath("/");
     revalidatePath("/admin/categories");
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === "P2025") {
-        return NextResponse.json({ error: "分类不存在" }, { status: 404 });
-      }
-      if (error.code === "P2003") {
-        return NextResponse.json(
-          { error: "该分类下还有商品，无法删除" },
-          { status: 409 },
-        );
-      }
+    if (error instanceof AdminCategoryError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.status },
+      );
     }
 
     console.error("删除分类失败", error);

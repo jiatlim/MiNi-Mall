@@ -1,11 +1,15 @@
 import Link from "next/link";
 
 import { LogoutButton } from "@/components/auth/logout-button";
-import { getCurrentUser } from "@/lib/auth";
 
-export async function AdminHeader() {
-  const user = await getCurrentUser();
+type AdminHeaderProps = {
+  user: {
+    name: string | null;
+    email: string;
+  };
+};
 
+export function AdminHeader({ user }: AdminHeaderProps) {
   return (
     <header className="border-b border-neutral-200 bg-white">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6 lg:px-8">
@@ -18,7 +22,7 @@ export async function AdminHeader() {
             返回商城
           </Link>
           <span className="hidden text-neutral-600 sm:inline">
-            {user?.name ?? user?.email}
+            {user.name ?? user.email}
           </span>
           <LogoutButton />
         </div>

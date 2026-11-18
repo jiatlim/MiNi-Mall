@@ -1,6 +1,7 @@
 import { compare, hash } from "bcryptjs";
 import { jwtVerify, SignJWT } from "jose";
 import { cookies } from "next/headers";
+import { cache } from "react";
 
 import { USER_ROLES, type UserRole } from "@/lib/constants";
 import { prisma } from "@/lib/db";
@@ -129,3 +130,6 @@ export async function clearSession(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete(SESSION_COOKIE_NAME);
 }
+
+// 仅供 Server Component 页面使用，同一请求内复用当前用户查询。
+export const getCurrentUserForPage = cache(getCurrentUser);

@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+import {
+  ORDER_TRANSITION_TARGETS,
+  PRODUCT_STATUS_VALUES,
+} from "@/lib/constants";
+
 const slugSchema = z
   .string()
   .trim()
@@ -40,7 +45,7 @@ export const adminProductSchema = z.object({
         /^https?:\/\//i.test(value),
       "图片地址必须是站内路径或 http(s) URL",
     ),
-  status: z.enum(["ACTIVE", "INACTIVE"]),
+  status: z.enum(PRODUCT_STATUS_VALUES),
   categoryId: z.string().trim().min(1, "请选择分类"),
   sortOrder: z
     .number()
@@ -48,6 +53,10 @@ export const adminProductSchema = z.object({
     .min(0, "排序不能为负")
     .max(100_000, "排序过大")
     .default(0),
+});
+
+export const adminProductUpdateSchema = adminProductSchema.extend({
+  version: z.string().trim().min(1, "缺少版本信息，请刷新后重试"),
 });
 
 export const adminCategorySchema = z.object({
@@ -63,9 +72,12 @@ export const adminCategorySchema = z.object({
 });
 
 export const adminOrderStatusSchema = z.object({
-  status: z.enum(["PAID", "SHIPPED", "COMPLETED", "CANCELLED"]),
+  status: z.enum(ORDER_TRANSITION_TARGETS),
 });
 
 export type AdminProductInput = z.infer<typeof adminProductSchema>;
+export type AdminProductUpdateInput = z.infer<
+  typeof adminProductUpdateSchema
+>;
 export type AdminCategoryInput = z.infer<typeof adminCategorySchema>;
 export type AdminOrderStatusInput = z.infer<typeof adminOrderStatusSchema>;

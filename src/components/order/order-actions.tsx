@@ -67,7 +67,8 @@ export function OrderActions({ orderId, status }: OrderActionsProps) {
   }
 
   const canPay = status === ORDER_STATUS.PENDING;
-  const canCancel = status !== ORDER_STATUS.CANCELLED;
+  const canCancel =
+    status === ORDER_STATUS.PENDING || status === ORDER_STATUS.PAID;
 
   if (!canPay && !canCancel) {
     return null;

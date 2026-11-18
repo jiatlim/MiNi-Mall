@@ -60,6 +60,7 @@ export default async function EditProductPage({
           product={{
             ...product,
             imageUrl: product.imageUrl,
+            updatedAt: product.updatedAt.toISOString(),
           }}
         />
       </div>

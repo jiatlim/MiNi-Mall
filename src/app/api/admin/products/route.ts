@@ -1,38 +1,17 @@
-import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 
 import { getAdminWriteLimit, requireAdmin } from "@/lib/admin";
-import { prisma } from "@/lib/db";
 import { ensureJsonRequest } from "@/lib/request-security";
 import { parsePage } from "@/lib/utils";
 import { getAdminProducts } from "@/server/queries/admin";
+import {
+  AdminProductError,
+  createAdminProduct,
+} from "@/server/services/admin-products";
 import { adminProductSchema } from "@/validators/admin";
 
 const NO_STORE = { "Cache-Control": "no-store" };
-
-function productErrorResponse(error: unknown) {
-  if (error instanceof Prisma.PrismaClientKnownRequestError) {
-    if (error.code === "P2002") {
-      return NextResponse.json(
-        { error: "商品 slug 已存在" },
-        { status: 409 },
-      );
-    }
-    if (error.code === "P2003") {
-      return NextResponse.json(
-        { error: "分类不存在" },
-        { status: 400 },
-      );
-    }
-  }
-
-  console.error("商品操作失败", error);
-  return NextResponse.json(
-    { error: "操作失败，请稍后重试" },
-    { status: 500 },
-  );
-}
 
 export async function GET(request: Request) {
   const admin = await requireAdmin();
@@ -105,29 +84,25 @@ export async function POST(request: Request) {
     );
   }
 
-  const category = await prisma.category.findUnique({
-    where: { id: parsed.data.categoryId },
-    select: { id: true },
-  });
-
-  if (!category) {
-    return NextResponse.json({ error: "分类不存在" }, { status: 400 });
-  }
-
   try {
-    const product = await prisma.product.create({
-      data: {
-        ...parsed.data,
-        imageUrl: parsed.data.imageUrl || null,
-      },
-      select: { id: true, name: true, slug: true },
-    });
+    const product = await createAdminProduct(parsed.data);
 
     revalidatePath("/");
     revalidatePath("/admin/products");
 
     return NextResponse.json({ ok: true, product }, { status: 201 });
   } catch (error) {
-    return productErrorResponse(error);
+    if (error instanceof AdminProductError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.status },
+      );
+    }
+
+    console.error("创建商品失败", error);
+    return NextResponse.json(
+      { error: "创建商品失败，请稍后重试" },
+      { status: 500 },
+    );
   }
 }

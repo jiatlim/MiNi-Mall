@@ -49,17 +49,17 @@ export async function getAdminProducts({
   await assertAdmin();
 
   const safePage = parsePage(page);
-  const keyword = search
-    .trim()
-    .replace(/[%_\\]/g, "")
-    .slice(0, 50);
-  const where: Prisma.ProductWhereInput = keyword
-    ? {
-        OR: [
-          { name: { contains: keyword } },
-          { slug: { contains: keyword } },
-        ],
-      }
+  const rawKeyword = search.trim();
+  const keyword = rawKeyword.replace(/[%_\\]/g, "").slice(0, 50);
+  const where: Prisma.ProductWhereInput = rawKeyword
+    ? keyword
+      ? {
+          OR: [
+            { name: { contains: keyword } },
+            { slug: { contains: keyword } },
+          ],
+        }
+      : { id: { in: [] } }
     : {};
 
   const total = await prisma.product.count({ where });
@@ -99,6 +99,7 @@ export async function getAdminProductById(id: string) {
       status: true,
       sortOrder: true,
       categoryId: true,
+      updatedAt: true,
     },
   });
 }

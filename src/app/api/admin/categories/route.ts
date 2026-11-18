@@ -1,11 +1,13 @@
-import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 
 import { getAdminWriteLimit, requireAdmin } from "@/lib/admin";
-import { prisma } from "@/lib/db";
 import { ensureJsonRequest } from "@/lib/request-security";
 import { getAdminCategories } from "@/server/queries/admin";
+import {
+  AdminCategoryError,
+  createAdminCategory,
+} from "@/server/services/admin-categories";
 import { adminCategorySchema } from "@/validators/admin";
 
 const NO_STORE = { "Cache-Control": "no-store" };
@@ -78,26 +80,17 @@ export async function POST(request: Request) {
   }
 
   try {
-    const category = await prisma.category.create({
-      data: {
-        ...parsed.data,
-        description: parsed.data.description || null,
-      },
-      select: { id: true, name: true, slug: true },
-    });
+    const category = await createAdminCategory(parsed.data);
 
     revalidatePath("/");
     revalidatePath("/admin/categories");
 
     return NextResponse.json({ ok: true, category }, { status: 201 });
   } catch (error) {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2002"
-    ) {
+    if (error instanceof AdminCategoryError) {
       return NextResponse.json(
-        { error: "分类 slug 已存在" },
-        { status: 409 },
+        { error: error.message },
+        { status: error.status },
       );
     }
 
