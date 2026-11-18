@@ -8,3 +8,10 @@ export const PRODUCT_STATUS = {
 } as const;
 
 export type ProductStatus = (typeof PRODUCT_STATUS)[keyof typeof PRODUCT_STATUS];
+
+export const USER_ROLES = {
+  USER: "USER",
+  ADMIN: "ADMIN",
+} as const;
+
+export type UserRole = (typeof USER_ROLES)[keyof typeof USER_ROLES];
