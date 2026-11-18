@@ -87,22 +87,30 @@ npm.cmd prune --ignore-scripts
 | `prisma init` 在 Node 24 下崩溃 | `(0, CSe.isError) is not a function` | 手动创建 `prisma/schema.prisma` 与 `.env`；`prisma -v`、`validate`、`generate` 均正常 |
 | Prisma 5.22 未官方支持 Node 24 | 可能出现过时警告 | 当前 `validate` 正常；后续 migrate 若失败，再降 Node 22 LTS 或升级 Prisma |
 | PowerShell 禁止 `npm.ps1` | 直接运行 `npm` 报执行策略错误 | 统一使用 `npm.cmd` / `npx.cmd` |
-| 空 schema 下 `prisma generate` 失败 | “You don't have any models defined” | 属于预期；P1 定义模型后恢复 `build: prisma generate && next build` 与 `postinstall` |
+| 空 schema 下 `prisma generate` 失败 | “You don't have any models defined” | 已恢复 `build: prisma generate && next build` 与 `postinstall`；当前 schema 已包含模型 |
+| `import "server-only"` | `npm ls server-only` 为空 | 由 Next.js 内部别名提供，无需单独安装 |
 | `.env` 被 `.gitignore` 忽略 | `.env.example` 也会被忽略 | 已在 `.gitignore` 增加 `!.env.example` |
 
-## 6. 校验结果（P0）
+## 6. 校验结果（当前，2026-11-18）
 
 | 检查 | 命令 | 结果 |
 |---|---|---|
 | 依赖树 | `npm.cmd ls --depth=0` | 通过，无 extraneous 包 |
 | Prisma schema | `npx.cmd prisma validate` | 通过（schema is valid） |
+| 数据库迁移 | `npx.cmd prisma migrate status` | 已是最新 |
 | TypeScript | `npm.cmd run typecheck` | 通过，exit 0 |
 | ESLint | `npm.cmd run lint` | 通过，exit 0 |
-| 生产构建 | `npm.cmd run build` | 通过，生成 `/` 与 `/_not-found` |
+| 生产构建 | `npm.cmd run build` | 通过 |
 | 开发服务器 | `npm.cmd run dev` + `GET http://localhost:3000` | HTTP 200 |
 
-## 7. 后续步骤追加区
+## 7. 后续阶段依赖变更
 
-- P1：数据模型与迁移、seed 相关依赖（如需新增包在此记录）
-- P2：认证相关依赖
-- P3+：UI/表单依赖
+- 购物车、订单、后台管理、商品插画、审查修复阶段均未新增 npm 依赖。
+- `server-only` 由 Next.js 内部别名提供，未加入 `package.json`。
+- 商品插画为仓库内本地 SVG，不依赖外部图片服务。
+- 新增依赖时必须同步更新本文件与 `package-lock.json`。
+
+## 8. 安装文档
+
+- 克隆、环境变量、迁移、seed 与启动步骤见 [`README.md`](./README.md)。
+- 管理员默认账号与 Seed 行为也在 README 中说明。
