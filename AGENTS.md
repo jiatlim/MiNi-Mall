@@ -44,6 +44,7 @@ npm.cmd run db:reset
 
 - 读取：Server Component 直接调用 `src/server/queries/*`，不额外造 REST API。
 - 写入：统一 Server Action（`src/server/actions/*`），入参先过 Zod，返回统一的 `ActionResult`。
+- 例外：公开商品 API、购物车/订单 API、后台管理 API 属于显式需求，放在 `src/app/api/**`，写逻辑复用 `src/server/services/*`；页面读取仍走 `src/server/queries/*`。
 - 数据库：`src/lib/db.ts` 导出 Prisma 单例，禁止在组件内 `new PrismaClient()`。
 - 金额：数据库与计算一律用整数“分”（`*Cents`），仅展示层格式化。
 - 状态：商品/订单状态用字符串常量，集中在 `src/lib/constants.ts`（SQLite 不支持 enum）。

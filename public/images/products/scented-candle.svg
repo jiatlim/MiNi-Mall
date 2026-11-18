@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-labelledby="title">
+  <title id="title">香薰蜡烛</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#b45309"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="800" fill="url(#bg)"/>
+  <circle cx="660" cy="150" r="150" fill="#ffffff" opacity="0.08"/>
+  <circle cx="140" cy="660" r="200" fill="#ffffff" opacity="0.06"/>
+  <rect x="200" y="200" width="400" height="400" rx="100" fill="#ffffff" opacity="0.12"/>
+  <g fill="none" stroke="#ffffff" stroke-width="18" stroke-linecap="round" stroke-linejoin="round">
+    
+      <rect x="300" y="382" width="200" height="208" rx="36"/>
+      <path d="M340 382 C340 360 460 360 460 382"/>
+      <path d="M400 300 C368 342 382 372 400 392 C418 372 432 342 400 300 Z"/>
+      <path d="M400 368 L400 390"/>
+    
+  </g>
+</svg>

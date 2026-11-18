@@ -6,6 +6,13 @@ export const MAX_CART_QUANTITY = 999;
 
 export const ORDERS_PAGE_SIZE = 10;
 
+export const ADMIN_PAGE_SIZE = 10;
+
+export const PRODUCT_STATUS_LABELS: Record<ProductStatus, string> = {
+  ACTIVE: "上架",
+  INACTIVE: "下架",
+};
+
 export const PRODUCT_STATUS = {
   ACTIVE: "ACTIVE",
   INACTIVE: "INACTIVE",
@@ -36,4 +43,12 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   SHIPPED: "已发货",
   COMPLETED: "已完成",
   CANCELLED: "已取消",
+};
+
+export const ORDER_ADMIN_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
+  PENDING: [ORDER_STATUS.PAID, ORDER_STATUS.CANCELLED],
+  PAID: [ORDER_STATUS.SHIPPED, ORDER_STATUS.CANCELLED],
+  SHIPPED: [ORDER_STATUS.COMPLETED, ORDER_STATUS.CANCELLED],
+  COMPLETED: [ORDER_STATUS.CANCELLED],
+  CANCELLED: [],
 };

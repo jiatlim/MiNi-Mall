@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { hash } from "bcryptjs";
 
 const prisma = new PrismaClient();
 
@@ -221,15 +222,67 @@ async function main() {
         throw new Error(`未找到分类：${categorySlug}`);
       }
 
+      const imageUrl = `/images/products/${product.slug}.svg`;
+
       await tx.product.upsert({
         where: { slug: product.slug },
-        update: { ...data, categoryId },
-        create: { ...data, categoryId },
+        update: { ...data, categoryId, imageUrl },
+        create: { ...data, categoryId, imageUrl },
       });
     }
   });
 
+  const adminEmail = (process.env.SEED_ADMIN_EMAIL ?? "admin@mini.mall")
+    .trim()
+    .toLowerCase();
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD;
+  const resetAdminPassword =
+    process.env.SEED_ADMIN_RESET_PASSWORD === "true";
+
+  const existingAdmin = await prisma.user.findUnique({
+    where: { email: adminEmail },
+    select: { role: true },
+  });
+
+  if (existingAdmin && existingAdmin.role !== "ADMIN") {
+    throw new Error(
+      `账号 ${adminEmail} 已存在且不是管理员，拒绝自动提权。请更换 SEED_ADMIN_EMAIL 或手动处理。`,
+    );
+  }
+
+  if (existingAdmin) {
+    if (resetAdminPassword) {
+      if (!adminPassword) {
+        throw new Error(
+          "SEED_ADMIN_RESET_PASSWORD=true 时必须提供 SEED_ADMIN_PASSWORD",
+        );
+      }
+
+      await prisma.user.update({
+        where: { email: adminEmail },
+        data: { passwordHash: await hash(adminPassword, 12) },
+      });
+      console.log("已重置管理员密码");
+    }
+  } else {
+    if (!adminPassword) {
+      console.warn(
+        "未设置 SEED_ADMIN_PASSWORD，使用默认演示密码 Admin123456，请尽快修改。",
+      );
+    }
+
+    await prisma.user.create({
+      data: {
+        email: adminEmail,
+        name: "管理员",
+        passwordHash: await hash(adminPassword ?? "Admin123456", 12),
+        role: "ADMIN",
+      },
+    });
+  }
+
   console.log(`已写入 ${categories.length} 个分类、${products.length} 件商品`);
+  console.log(`管理员账号：${adminEmail}`);
 }
 
 main()

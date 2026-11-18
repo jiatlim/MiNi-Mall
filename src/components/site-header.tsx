@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { LogoutButton } from "@/components/auth/logout-button";
 import { getCurrentUser } from "@/lib/auth";
-import { SITE_NAME } from "@/lib/constants";
+import { SITE_NAME, USER_ROLES } from "@/lib/constants";
 
 export async function SiteHeader() {
   const user = await getCurrentUser();
@@ -33,6 +33,14 @@ export async function SiteHeader() {
             <span className="sm:hidden">订单</span>
             <span className="hidden sm:inline">我的订单</span>
           </Link>
+          {user?.role === USER_ROLES.ADMIN ? (
+            <Link
+              href="/admin"
+              className="text-sm font-medium text-neutral-900 hover:underline"
+            >
+              后台
+            </Link>
+          ) : null}
           {user ? (
             <>
               <span className="hidden max-w-40 truncate text-sm text-neutral-600 sm:inline">

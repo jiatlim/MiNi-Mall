@@ -1,7 +1,13 @@
 import { Prisma } from "@prisma/client";
 import { randomUUID } from "node:crypto";
 
-import { ORDER_STATUS, PRODUCT_STATUS } from "@/lib/constants";
+import {
+  ORDER_ADMIN_TRANSITIONS,
+  ORDER_STATUS,
+  ORDER_STATUS_LABELS,
+  PRODUCT_STATUS,
+  type OrderStatus,
+} from "@/lib/constants";
 import { prisma } from "@/lib/db";
 import { orderDetailSelect } from "@/server/queries/orders";
 
@@ -239,6 +245,97 @@ export async function cancelOrder(userId: string, orderId: string) {
         order.status === ORDER_STATUS.PAID;
 
       if (shouldRestock) {
+        for (const item of order.items) {
+          const restored = await tx.product.updateMany({
+            where: { id: item.productId },
+            data: { stock: { increment: item.quantity } },
+          });
+
+          if (restored.count === 0) {
+            throw new OrderError("商品已不存在，无法恢复库存", 409);
+          }
+        }
+      }
+
+      const result = await tx.order.findUnique({
+        where: { id: orderId },
+        select: orderDetailSelect,
+      });
+
+      if (!result) {
+        throw new OrderError("订单不存在", 404);
+      }
+
+      return result;
+    }, { timeout: 10_000, maxWait: 5_000 }),
+  );
+}
+
+export async function updateOrderStatusAsAdmin(
+  orderId: string,
+  nextStatus: OrderStatus,
+) {
+  return withOrderRetry(() =>
+    prisma.$transaction(async (tx) => {
+      const order = await tx.order.findFirst({
+        where: { id: orderId },
+        select: {
+          id: true,
+          status: true,
+          items: {
+            select: { productId: true, quantity: true },
+          },
+        },
+      });
+
+      if (!order) {
+        throw new OrderError("订单不存在", 404);
+      }
+
+      const currentStatus = order.status as OrderStatus;
+      const allowed = ORDER_ADMIN_TRANSITIONS[currentStatus] ?? [];
+
+      if (!allowed.includes(nextStatus)) {
+        throw new OrderError(
+          `订单不能从「${ORDER_STATUS_LABELS[currentStatus] ?? currentStatus}」变更为「${ORDER_STATUS_LABELS[nextStatus]}」`,
+          400,
+        );
+      }
+
+      const data: Prisma.OrderUpdateManyMutationInput = {
+        status: nextStatus,
+      };
+
+      if (nextStatus === ORDER_STATUS.PAID) {
+        data.paidAt = new Date();
+      }
+      if (nextStatus === ORDER_STATUS.SHIPPED) {
+        data.shippedAt = new Date();
+      }
+      if (nextStatus === ORDER_STATUS.COMPLETED) {
+        data.completedAt = new Date();
+      }
+      if (nextStatus === ORDER_STATUS.CANCELLED) {
+        data.cancelledAt = new Date();
+      }
+
+      const updated = await tx.order.updateMany({
+        where: {
+          id: orderId,
+          status: currentStatus,
+        },
+        data,
+      });
+
+      if (updated.count === 0) {
+        throw new OrderError("订单状态已变化，请刷新后重试", 409);
+      }
+
+      if (
+        nextStatus === ORDER_STATUS.CANCELLED &&
+        (currentStatus === ORDER_STATUS.PENDING ||
+          currentStatus === ORDER_STATUS.PAID)
+      ) {
         for (const item of order.items) {
           const restored = await tx.product.updateMany({
             where: { id: item.productId },

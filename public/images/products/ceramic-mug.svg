@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-labelledby="title">
+  <title id="title">陶瓷马克杯</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7c2d12"/>
+      <stop offset="100%" stop-color="#f97316"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="800" fill="url(#bg)"/>
+  <circle cx="660" cy="150" r="150" fill="#ffffff" opacity="0.08"/>
+  <circle cx="140" cy="660" r="200" fill="#ffffff" opacity="0.06"/>
+  <rect x="200" y="200" width="400" height="400" rx="100" fill="#ffffff" opacity="0.12"/>
+  <g fill="none" stroke="#ffffff" stroke-width="18" stroke-linecap="round" stroke-linejoin="round">
+    
+      <rect x="300" y="340" width="180" height="220" rx="28"/>
+      <path d="M480 388 C544 388 544 508 480 508"/>
+      <path d="M352 300 C332 272 372 252 352 224"/>
+      <path d="M416 300 C396 272 436 252 416 224"/>
+    
+  </g>
+</svg>

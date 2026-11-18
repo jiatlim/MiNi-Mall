@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-labelledby="title">
+  <title id="title">轻量羽绒服</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#be123c"/>
+      <stop offset="100%" stop-color="#db2777"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="800" fill="url(#bg)"/>
+  <circle cx="660" cy="150" r="150" fill="#ffffff" opacity="0.08"/>
+  <circle cx="140" cy="660" r="200" fill="#ffffff" opacity="0.06"/>
+  <rect x="200" y="200" width="400" height="400" rx="100" fill="#ffffff" opacity="0.12"/>
+  <g fill="none" stroke="#ffffff" stroke-width="18" stroke-linecap="round" stroke-linejoin="round">
+    
+      <path d="M330 284 L400 322 L470 284 L548 342 L512 560 L288 560 L252 342 Z"/>
+      <path d="M400 322 L400 560"/>
+      <path d="M330 420 L470 420"/>
+      <path d="M330 480 L470 480"/>
+    
+  </g>
+</svg>
